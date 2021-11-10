@@ -6,18 +6,18 @@ import { Result } from 'fpts-monads';
  * Remove a child of a person by the childId and the personId
  *
  * @export
- * @class AddChildToPersonCommand
+ * @class RemoveChildFromPersonCommand
  */
-export class AddChildToPersonCommand {
+export class RemoveChildFromPersonCommand {
   constructor(public childId: string, public personId: string) {}
 }
 
-@CommandHandler(AddChildToPersonCommand)
-export class AddChildToPersonHandler
-  implements ICommandHandler<AddChildToPersonCommand> {
+@CommandHandler(RemoveChildFromPersonCommand)
+export class RemoveChildFromPersonHandler
+  implements ICommandHandler<RemoveChildFromPersonCommand> {
   constructor(private repository: IPersonRepository) {}
 
-  async execute(cmd: AddChildToPersonCommand): Promise<Result<void>> {
+  async execute(cmd: RemoveChildFromPersonCommand): Promise<Result<void>> {
     return this.repository.removeChildFromPerson(cmd.childId, cmd.personId);
   }
 }
