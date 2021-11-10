@@ -18,13 +18,18 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "migration:generate": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:generate --config ./orm.config.json --name",
+    "migration:run": "ts-node -r tsconfig-paths/register node_modules/.bin/typeorm migration:run --config ./orm.config.json",
+    "migration:revert": "ts-node -r tsconfig-paths/register node_modules/.bin/typeorm migration:revert --config ./orm.config.json",
+    "update:database": "ts-node ./node_modules/typeorm/cli.js migration:run --config ./orm.config.json"
   },
   "dependencies": {
     "@nestjs/common": "^7.0.0",
     "@nestjs/core": "^7.0.0",
     "@nestjs/cqrs": "^8.0.0",
     "@nestjs/platform-express": "^7.0.0",
+    "@nestjs/typeorm": "^8.0.2",
     "fpts-monads": "^1.0.1",
     "mysql2": "^2.3.3-rc.0",
     "reflect-metadata": "^0.1.13",

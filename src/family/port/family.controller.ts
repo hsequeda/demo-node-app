@@ -8,6 +8,7 @@ import {
   HttpException,
   HttpStatus,
   Param,
+  Get,
 } from '@nestjs/common';
 import { QueryBus, CommandBus } from '@nestjs/cqrs';
 import { AddPersonCommand } from '../app/command/add-person';
@@ -18,6 +19,8 @@ import { DeletePersonCommand as RemovePersonCommand } from '../app/command/delet
 import { AddChildToPersonDto } from './dto/add-child-to-person.dto';
 import { AddChildToPersonCommand } from '../app/command/add-child-to-person';
 import { RemoveChildFromPersonCommand } from '../app/command/remove-child-from-person';
+import { OnePersonQuery } from '../app/queries/one-person';
+import { AllPersonQuery } from '../app/queries/all-persons';
 
 @Controller('family')
 export class FamilyController {
@@ -109,5 +112,19 @@ export class FamilyController {
       const err = okOrErr.unwrap();
       throw new HttpException(err.name, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  @HttpCode(200)
+  @Get(':personId')
+  onePerson(@Param() personId: string) {
+    const person = this.queryBus.execute(new OnePersonQuery(personId));
+    return person;
+  }
+
+  @Get()
+  @HttpCode(200)
+  allPerson() {
+    const persons = this.queryBus.execute(new AllPersonQuery());
+    return persons;
   }
 }
