@@ -3,6 +3,7 @@ import { ICommandHandler, CommandHandler } from '@nestjs/cqrs';
 import { Result } from 'fpts-monads';
 import { Person } from 'src/family/domaim/person';
 import { PersonGenderFromString } from 'src/family/domaim/personal-gender';
+import { Inject } from '@nestjs/common';
 
 /**
  * Add a new person person if it's valid
@@ -23,7 +24,10 @@ export class AddPersonCommand {
 
 @CommandHandler(AddPersonCommand)
 export class AddPersonHandler implements ICommandHandler<AddPersonCommand> {
-  constructor(private repository: IPersonRepository) {}
+  constructor(
+    @Inject('IPersonRepository')
+    private repository: IPersonRepository,
+  ) {}
 
   async execute(cmd: AddPersonCommand): Promise<Result<void>> {
     const personGender = PersonGenderFromString(cmd.gender);

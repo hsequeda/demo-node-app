@@ -1,6 +1,7 @@
 import { IPersonRepository } from 'src/family/domaim/person.repository';
 import { ICommandHandler, CommandHandler } from '@nestjs/cqrs';
 import { Result } from 'fpts-monads';
+import { Inject } from '@nestjs/common';
 
 /**
  * Remove a child of a person by the childId and the personId
@@ -15,7 +16,10 @@ export class RemoveChildFromPersonCommand {
 @CommandHandler(RemoveChildFromPersonCommand)
 export class RemoveChildFromPersonHandler
   implements ICommandHandler<RemoveChildFromPersonCommand> {
-  constructor(private repository: IPersonRepository) {}
+  constructor(
+    @Inject('IPersonRepository')
+    private repository: IPersonRepository,
+  ) {}
 
   async execute(cmd: RemoveChildFromPersonCommand): Promise<Result<void>> {
     return this.repository.removeChildFromPerson(cmd.childId, cmd.personId);

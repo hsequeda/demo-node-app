@@ -1,4 +1,5 @@
 import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
+import { Inject } from '@nestjs/common';
 
 /**
  * Return a list of person with its number of children
@@ -23,9 +24,12 @@ export interface IAllPersonReadModel {
 }
 
 @QueryHandler(AllPersonQuery)
-class AllPersonHandler implements IQueryHandler<AllPersonQuery> {
-  constructor(private readonly _allPersonReadModel: IAllPersonReadModel) {}
-  execute(_: AllPersonQuery): Promise<PersonDto[]> {
+export class AllPersonHandler implements IQueryHandler<AllPersonQuery> {
+  constructor(
+    @Inject('IAllPersonReadModel')
+    private readonly _allPersonReadModel: IAllPersonReadModel,
+  ) {}
+  async execute(_: AllPersonQuery): Promise<PersonDto[]> {
     return this._allPersonReadModel.allPersons();
   }
 }

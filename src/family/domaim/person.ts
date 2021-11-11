@@ -40,7 +40,6 @@ export class Person {
       return Result.Fail(new UnableToCreateNewPersonError('id is empty'));
     }
 
-    console.log(name.length);
     if (!name || name.length < 20 || name.length > 150) {
       return Result.Fail(new UnableToCreateNewPersonError('invalid name'));
     }

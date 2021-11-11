@@ -1,4 +1,5 @@
 import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
+import { Inject } from '@nestjs/common';
 
 export class OnePersonQuery {
   constructor(public readonly personId: string) {}
@@ -24,8 +25,11 @@ export interface IOnePersonReadModel {
 }
 
 @QueryHandler(OnePersonQuery)
-class OnePersonHandler implements IQueryHandler<OnePersonQuery> {
-  constructor(private readonly _onePersonReadModel: IOnePersonReadModel) {}
+export class OnePersonHandler implements IQueryHandler<OnePersonQuery> {
+  constructor(
+    @Inject('IOnePersonReadModel')
+    private readonly _onePersonReadModel: IOnePersonReadModel,
+  ) {}
   execute(query: OnePersonQuery): Promise<PersonDto> {
     return this._onePersonReadModel.onePerson(query.personId);
   }

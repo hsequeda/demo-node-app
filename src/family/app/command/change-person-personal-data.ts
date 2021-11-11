@@ -3,6 +3,7 @@ import { ICommandHandler, CommandHandler } from '@nestjs/cqrs';
 import { Result } from 'fpts-monads';
 import { Person } from 'src/family/domaim/person';
 import { PersonGenderFromString } from 'src/family/domaim/personal-gender';
+import { Inject } from '@nestjs/common';
 
 /**
  * Change the personal data of a person
@@ -24,10 +25,13 @@ export class ChangePersonPersonalDataCommand {
 @CommandHandler(ChangePersonPersonalDataCommand)
 export class ChangePersonPersonalDataHandler
   implements ICommandHandler<ChangePersonPersonalDataCommand> {
-  constructor(private repository: IPersonRepository) {}
+  constructor(
+    @Inject('IPersonRepository')
+    private repository: IPersonRepository,
+  ) {}
 
   async execute(cmd: ChangePersonPersonalDataCommand): Promise<Result<void>> {
-    const personOrErr = this.repository.getOne(cmd.personId);
+    const personOrErr = await this.repository.getOne(cmd.personId);
     if (personOrErr.isFailure) {
       return Result.Fail(personOrErr.unwrapError());
     }

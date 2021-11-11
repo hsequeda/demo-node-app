@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Res, Logger } from '@nestjs/common';
 import { PersonEntity } from './person.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IPersonRepository } from '../domaim/person.repository';
@@ -18,12 +18,15 @@ import { PersonGenderFromString } from '../domaim/personal-gender';
 @Injectable()
 export class PersonRepository
   implements IPersonRepository, IAllPersonReadModel, IOnePersonReadModel {
+  private _logger: Logger;
   constructor(
     @InjectRepository(PersonEntity)
     private _personRepository: Repository<PersonEntity>,
     @InjectRepository(ChildEntity)
     private _childRepository: Repository<ChildEntity>,
-  ) {}
+  ) {
+    this._logger = new Logger('PersonRepository');
+  }
 
   async save(newPerson: Person): Promise<Result<void, IResultError>> {
     try {
@@ -36,6 +39,7 @@ export class PersonRepository
         age: newPerson.age,
       });
     } catch (err) {
+      this._logger.warn(err.message, 'save');
       return Result.Fail<void>(new UnexpectedError(err.message));
     }
 
@@ -55,6 +59,7 @@ export class PersonRepository
         personModel.age,
       );
     } catch (err) {
+      this._logger.warn(err.message, 'getOne');
       return Result.Fail<Person>(new UnexpectedError(err.message));
     }
   }
@@ -63,7 +68,10 @@ export class PersonRepository
     try {
       await this._childRepository.delete({ father: { id: personId } });
       await this._personRepository.delete({ id: personId });
+
+      return Result.Ok();
     } catch (err) {
+      this._logger.warn(err.message, 'remove');
       return Result.Fail<void>(new UnexpectedError(err.message));
     }
   }
@@ -78,7 +86,9 @@ export class PersonRepository
         name: child.name,
         father: { id: personId },
       });
+      return Result.Ok();
     } catch (err) {
+      this._logger.warn(err.message, 'addChildToPerson');
       return Result.Fail<void>(new UnexpectedError(err.message));
     }
   }
@@ -92,7 +102,9 @@ export class PersonRepository
         id: childId,
         father: { id: personId },
       });
+      return Result.Ok();
     } catch (err) {
+      this._logger.warn(err.message, 'removeChildFromPerson');
       return Result.Fail<void>(new UnexpectedError(err.message));
     }
   }
@@ -100,8 +112,9 @@ export class PersonRepository
   async allPersons(): Promise<PersonDto[]> {
     try {
       const personModels = await this._personRepository.find({
-        loadEagerRelations: true,
+        relations: ['chidren'],
       });
+
       return personModels.map(personModel => {
         return {
           id: personModel.id,
@@ -114,6 +127,7 @@ export class PersonRepository
         } as PersonDto;
       });
     } catch (err) {
+      this._logger.warn(err.message, 'allPersons');
       return [];
     }
   }
@@ -122,7 +136,7 @@ export class PersonRepository
     const resp: OnePersonDto = {} as OnePersonDto;
     try {
       const personModel = await this._personRepository.findOne(personId, {
-        loadEagerRelations: true,
+        relations: ['chidren'],
       });
 
       resp.id = personModel.id;
@@ -131,13 +145,25 @@ export class PersonRepository
       resp.gender = personModel.gender;
       resp.age = personModel.age;
       resp.married = personModel.married;
+      resp.children = [];
       for (const child of personModel.chidren) {
         resp.children.push({ id: child.id, name: child.name });
       }
 
       return resp;
     } catch (err) {
+      this._logger.warn(err.message, 'onePerson');
       return {} as OnePersonDto;
     }
+  }
+
+  /**
+   * Warning!. This method is only for test case
+   *
+   * @memberof PersonRepository
+   */
+  async clear() {
+    await this._childRepository.delete({});
+    await this._personRepository.delete({});
   }
 }

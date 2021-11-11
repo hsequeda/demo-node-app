@@ -1,3 +1,4 @@
+import { v4 } from 'uuid';
 import {
   Controller,
   Post,
@@ -9,6 +10,7 @@ import {
   HttpStatus,
   Param,
   Get,
+  UseGuards,
 } from '@nestjs/common';
 import { QueryBus, CommandBus } from '@nestjs/cqrs';
 import { AddPersonCommand } from '../app/command/add-person';
@@ -21,6 +23,7 @@ import { AddChildToPersonCommand } from '../app/command/add-child-to-person';
 import { RemoveChildFromPersonCommand } from '../app/command/remove-child-from-person';
 import { OnePersonQuery } from '../app/queries/one-person';
 import { AllPersonQuery } from '../app/queries/all-persons';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('family')
 export class FamilyController {
@@ -28,10 +31,11 @@ export class FamilyController {
 
   @HttpCode(204)
   @Post()
+  @UseGuards(AuthGuard('jwt'))
   async addPerson(@Body() addPersonDto: AddPersonDto) {
     const okOrErr = await this.commandBus.execute(
       new AddPersonCommand(
-        '',
+        v4(),
         addPersonDto.name,
         addPersonDto.lastname,
         addPersonDto.gender,
@@ -48,6 +52,7 @@ export class FamilyController {
 
   @HttpCode(204)
   @Patch()
+  @UseGuards(AuthGuard('jwt'))
   async changePersonPersonalData(
     @Body() changePersonPersonalDataDto: ChangePersonPersonalDataDto,
   ) {
@@ -70,6 +75,7 @@ export class FamilyController {
 
   @HttpCode(204)
   @Delete(':personId')
+  @UseGuards(AuthGuard('jwt'))
   async removePerson(@Param() personId: string) {
     const okOrErr = await this.commandBus.execute(
       new RemovePersonCommand(personId),
@@ -83,10 +89,11 @@ export class FamilyController {
 
   @HttpCode(204)
   @Post('addChild')
+  @UseGuards(AuthGuard('jwt'))
   async addChildToPerson(@Body() addChildToPersonDto: AddChildToPersonDto) {
     const okOrErr = await this.commandBus.execute(
       new AddChildToPersonCommand(
-        '',
+        v4(),
         addChildToPersonDto.childName,
         addChildToPersonDto.personId,
       ),
@@ -100,6 +107,7 @@ export class FamilyController {
 
   @HttpCode(204)
   @Delete('removeChild/:personId/:childId')
+  @UseGuards(AuthGuard('jwt'))
   async removeChildFromPerson(
     @Param() personId: string,
     @Param() childId: string,
@@ -116,14 +124,16 @@ export class FamilyController {
 
   @HttpCode(200)
   @Get(':personId')
-  onePerson(@Param() personId: string) {
+  @UseGuards(AuthGuard('jwt'))
+  async onePerson(@Param('personId') personId: string) {
     const person = this.queryBus.execute(new OnePersonQuery(personId));
     return person;
   }
 
   @Get()
   @HttpCode(200)
-  allPerson() {
+  @UseGuards(AuthGuard('jwt'))
+  async allPerson() {
     const persons = this.queryBus.execute(new AllPersonQuery());
     return persons;
   }
