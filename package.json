@@ -15,36 +15,43 @@
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:integration": "jest --config jest-integration.config.cjs",
     "migration:generate": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:generate --config ./orm.config.json --name",
-    "migration:run": "ts-node -r tsconfig-paths/register node_modules/.bin/typeorm migration:run --config ./orm.config.json",
-    "migration:revert": "ts-node -r tsconfig-paths/register node_modules/.bin/typeorm migration:revert --config ./orm.config.json",
-    "update:database": "ts-node ./node_modules/typeorm/cli.js migration:run --config ./orm.config.json"
+    "migration:run": "ts-node -r tsconfig-paths/register ./node_modules/.bin/typeorm migration:run --config ./orm.config.json",
+    "migration:revert": "ts-node -r tsconfig-paths/register ./node_modules/.bin/typeorm migration:revert --config ./orm.config.json"
   },
   "dependencies": {
     "@nestjs/common": "^7.0.0",
+    "@nestjs/config": "^1.1.0",
     "@nestjs/core": "^7.0.0",
     "@nestjs/cqrs": "^8.0.0",
+    "@nestjs/jwt": "^8.0.0",
+    "@nestjs/passport": "^8.0.1",
     "@nestjs/platform-express": "^7.0.0",
-    "@nestjs/typeorm": "^8.0.2",
+    "@nestjs/typeorm": "7.0.0",
+    "@types/passport-local": "^1.0.34",
+    "bcryptjs": "^2.4.3",
     "fpts-monads": "^1.0.1",
     "mysql2": "^2.3.3-rc.0",
+    "passport": "^0.5.0",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.5.4",
-    "typeorm": "^0.2.39"
+    "typeorm": "^0.2.39",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@nestjs/cli": "^7.0.0",
     "@nestjs/schematics": "^7.0.0",
-    "@nestjs/testing": "^7.0.0",
+    "@nestjs/testing": "7.0.0",
+    "@types/bcryptjs": "^2.4.2",
     "@types/express": "^4.17.3",
     "@types/jest": "25.2.3",
     "@types/node": "^13.9.1",
     "@types/supertest": "^2.0.8",
+    "@types/uuid": "^8.3.1",
     "@typescript-eslint/eslint-plugin": "3.0.2",
     "@typescript-eslint/parser": "3.0.2",
     "eslint": "7.1.0",
@@ -56,7 +63,7 @@
     "ts-jest": "26.1.0",
     "ts-loader": "^6.2.1",
     "ts-node": "^8.6.2",
-    "tsconfig-paths": "^3.9.0",
+    "tsconfig-paths": "^3.11.0",
     "typescript": "^3.7.4"
   },
   "jest": {
@@ -66,7 +73,10 @@
       "ts"
     ],
     "rootDir": "src",
-    "testRegex": ".spec.ts$",
+    "testRegex": [
+      ".spec.ts$",
+      ".integration_test.ts$"
+    ],
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
